@@ -27,7 +27,9 @@ int main(int argc, char* argv[]) {
 		data[0] = i;
 		database.insert(table4, data);
 	}
-
+	
+//	cout << table4->getNumberOfPhrases() << endl;
+	
 	QueryGraph queryGraph;
 	queryGraph.addJoin(table2, table1, 0, 0);
 	queryGraph.addJoin(table2, table3, 1, 0);

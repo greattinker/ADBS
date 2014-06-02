@@ -25,10 +25,10 @@ vector<Table*> Database::getJoinOrder(QueryGraph* queryGraph) {
 	vector<Table*> *results = ( vector<Table*>* )malloc( sizeof( vector<Table*> ) * tables.size() );
 	
 //	testing all possible root relations
-	int i = 0;
-	for(vector<Table*>::iterator it = tables.begin(); it != tables.end(); ++it){
-		results[i] = getOptimalLDT(queryGraph, (*it));
-	}
+//	int i = 0;
+//	for(vector<Table*>::iterator it = tables.begin(); it != tables.end(); ++it){
+//		results[i] = getOptimalLDT(queryGraph, (*it));
+//	}
 	
 	
 //	result = get best from results
