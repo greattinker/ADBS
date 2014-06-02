@@ -13,7 +13,6 @@
 using namespace std;
 
 class Table;
-class Stats;
 
 class Stats{
 public:
