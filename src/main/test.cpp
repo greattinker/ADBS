@@ -13,20 +13,26 @@ int main(int argc, char* argv[]) {
 		data[0] = i;
 		database.insert(table1, data);
 	}
+	table1->createStatisticsForColumn(0);
 	for (int i = 0; i < 50000; i++) {
 		data[0] = i * 5;
 		data[1] = i;
 		data[2] = i % 4000;
 		database.insert(table2, data);
 	}
+	table2->createStatisticsForColumn(0);
+	table2->createStatisticsForColumn(1);
+	table2->createStatisticsForColumn(2);
 	for (int i = 0; i < 4000; i++) {
 		data[0] = i;
 		database.insert(table3, data);
 	}
+	table3->createStatisticsForColumn(0);
 	for (int i = 0; i < 8000; i++) {
 		data[0] = i;
 		database.insert(table4, data);
 	}
+	table4->createStatisticsForColumn(0);
 	
 //	cout << table4->getNumberOfPhrases() << endl;
 	
@@ -34,12 +40,13 @@ int main(int argc, char* argv[]) {
 	queryGraph.addJoin(table2, table1, 0, 0);
 	queryGraph.addJoin(table2, table3, 1, 0);
 	queryGraph.addJoin(table2, table4, 2, 0);
-	vector<Table*> joinOrder = database.getJoinOrder(&queryGraph);
+	cout << "table2 unique values " << table2->getNumberDifferentValuesofColumn(2) << endl;
+//	vector<Table*> joinOrder = database.getJoinOrder(&queryGraph);
 
 	cout << "Join Order:" << endl;
-	for (vector<Table*>::iterator it = joinOrder.begin(); it != joinOrder.end(); it++) {
-		cout << (*it)->getName() << endl;
-	}
+//	for (vector<Table*>::iterator it = joinOrder.begin(); it != joinOrder.end(); it++) {
+//		cout << (*it)->getName() << endl;
+//	}
 
 }
 

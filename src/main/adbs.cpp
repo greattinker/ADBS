@@ -17,28 +17,143 @@ bool Database::insert(Table* table, int* tuple) {
 
 vector<Table*> Database::getJoinOrder(QueryGraph* queryGraph) {
 	vector<Table*> result;
-	
 	vector<Table*> tables = queryGraph->getTables();
-	vector<pair<Table*, Table*> > joins = queryGraph->getJoins();
 	vector<pair<int, int> > joinColumns = queryGraph->getJoinColumns();
+//	PrecedenceGraph precedenceGraph;
+	
+	vector<pair<int, vector<Table*> > > R;
 	
 	vector<Table*> *results = ( vector<Table*>* )malloc( sizeof( vector<Table*> ) * tables.size() );
 	
 //	testing all possible root relations
-//	int i = 0;
-//	for(vector<Table*>::iterator it = tables.begin(); it != tables.end(); ++it){
+	int i = 0;
+//	for(pair<vector<pair<Table*, Table*>>::iterator, vector<pair<int, int>>::iterator> i(joins->begin(), columns->begin()); i.first != joins->end(); ++i.first, ++i.second){		
+// have to find fitting join column for table !!!		
+//		vector<pair<Table*, Table*> >::iterator it_joins = i.first;
+//		vector<pair<int, int> >::iterator it_columns = i.second;
+	for(vector<Table*>::iterator it = tables.begin(); it != tables.end(); ++it){
+//		construct precedence graph rooted at node i
+/*		tables.erase(it);
+		precedenceGraph = queryGraphToPrecedenceGraph(tables, queryGraph->getJoins(), *it, precedenceGraph);
+
+		R.push_back(getOptimalLDT(&precedenceGraph));
+*/
 //		results[i] = getOptimalLDT(queryGraph, (*it));
-//	}
+		vector<pair<Table*, Table*> > joins = queryGraph->getJoins();
+		vector<Table*> tablelist = queryGraph->getTables();
+		PrecedenceGraphNode root = queryGraphToPrecedenceGraph(&tablelist, &joins, &joinColumns, (*it), 0);
+cout << "root is:"+(*it)->getName() << endl;
+cout << root.getChildren().size() << endl;
+cout << "!!!!!!!!!!!" << endl;
+		getOptimalLDT(root);
+	}
 	
 	
 //	result = get best from results
-	
+//	for test geht the first
+	//result = R.front().second;
+
 	return result;
 }
 
+bool Database::isNotChain(PrecedenceGraphNode* root){
+	vector<PrecedenceGraphNode> children = root->getChildren();
+	for(vector<PrecedenceGraphNode>::iterator it = children.begin(); it != children.end(); ++it){
+		if(!(*it).getChildren().empty())
+			return true;
+	}
 
-vector<Table*> Database::getOptimalLDT(QueryGraph* queryGraph, Table* table) {
+	return false;
+}
+/**
+* vorsicht die funktionen sind noch nicht ganz richtig im sinne des ikkbz algo.
+* eigentlich müsste man einen knoten finden der chains als kinder hat, ich laufe hier
+* bis zu den blättern durch, funktioniert auch (also hier noch nicht weil es nicht fertig implementiert ist)
+* aber ist eigentlich nicht richtig, würde es nochmals "richtig" implementieren, aber das schaff ich heute nicht mehr ^^
+*/
+PrecedenceGraphNode* Database::getSubtreeRoot(PrecedenceGraphNode* node){
+	if(node->getChildren().empty()) return node->getParent();
+
+	vector<PrecedenceGraphNode> children = node->getChildren();
+	for(vector<PrecedenceGraphNode>::iterator it = children.begin(); it != children.end(); ++it){
+		return getSubtreeRoot(&(*it));
+	}
+}
+
+PrecedenceGraphNode* Database::normalize(PrecedenceGraphNode* node){
+	//replace node by a compund relation cnode
+	//case one: root has more then 1 child
+	if(node->getChildren().size()>1){
+		//do nice stuff :)
+	}
+	else{
+		//only 1 child, merge node and child
+		PrecedenceGraphNode compoundNode;
+		//test rank functions for ascending order
+	}
+}
+
+vector<Table*> Database::getOptimalLDT(PrecedenceGraphNode root) {
+	while(isNotChain(&root)){
+		vector<PrecedenceGraphNode> children = root.getChildren();
+		for(vector<PrecedenceGraphNode>::iterator it = children.begin(); it != children.end(); ++it){
+			if(!(*it).getChildren().empty()){
+				PrecedenceGraphNode* subtreeRoot = getSubtreeRoot(&(*it));
+				normalize(subtreeRoot);
+			}
+		}
+		
+		//merge chains in ascending order
+	}
+
+	//denormalize
+
+	return root.getTables();
+}
+
+
+PrecedenceGraphNode Database::queryGraphToPrecedenceGraph(vector<Table*>* tables, vector<pair<Table*, Table*> >* joins, vector<pair<int, int> >* columns, Table* table, int column){
+	PrecedenceGraphNode node;
+	node.setTable(table, column);
+
+	for(vector<Table*>::iterator it = tables->begin(); it != tables->end(); ++it){
+		if((*it) == table){
+			tables->erase(it);
+			break;
+		}
+		cout << (*it)->getName() << endl;
+	}
+
+	cout << "currend node is "+table->getName() << endl;
 	
+	
+
+//	for(vector<pair<Table*, Table*> >::iterator it_joins = joins->begin(), vector<pair<int, int> >::iterator it_columns = columns->begin(); it_joins != joins->end(); ++it_joins, ++it_columns){
+//	vector<pair<Table*, Table*>>::iterator joinIter;
+//	vector<pair<int, int>>::iterator columnIter;
+	for(pair<vector<pair<Table*, Table*>>::iterator, vector<pair<int, int>>::iterator> i(joins->begin(), columns->begin()); i.first != joins->end(); ++i.first, ++i.second){		
+		vector<pair<Table*, Table*> >::iterator it_joins = i.first;
+		vector<pair<int, int> >::iterator it_columns = i.second;
+		
+		if((*it_joins).first == table){
+			if(std::find(tables->begin(), tables->end(), (*it_joins).second) != tables->end()){
+				PrecedenceGraphNode child = queryGraphToPrecedenceGraph(tables, joins, columns, (*it_joins).second, (*it_columns).second);
+				cout << "returned from "+child.getTables().front()->getName() << endl;
+				node.addChild(child);
+				child.setParent(&node);
+			}
+		}
+		else if((*it_joins).second == table){
+			if(std::find(tables->begin(), tables->end(), (*it_joins).first) != tables->end()){
+				PrecedenceGraphNode child = queryGraphToPrecedenceGraph(tables, joins, columns, (*it_joins).first, (*it_columns).first);
+				cout << "returned from "+child.getTables().front()->getName() << endl;
+				node.addChild(child);
+				child.setParent(&node);
+			}
+		}
+	}	
+	cout << "over" << endl;
+	return node;
 }
 
 

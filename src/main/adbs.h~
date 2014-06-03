@@ -38,7 +38,7 @@ public:
 protected:
 	map<int, unsigned int>* widthCountForColumns;
 	int* width;
-	const int partitions = 10;
+	const int partitions = 1000;
 };
 
 
@@ -70,8 +70,6 @@ public:
 	
 	vector<int*>::iterator getDataBegin(){ return this->data.begin(); };
 	vector<int*>::iterator getDataEnd(){ return this->data.end(); };
-	
-	void createStatisticsForColumn(int column){	this->columnStats->createColumnStatistics(this, column); };
 	
 	virtual ~Table() {};
 
@@ -126,75 +124,6 @@ protected:
 	vector<pair<int, int> > joinColumns;
 };
 
-class PrecedenceGraphNode {
-public:
-	PrecedenceGraphNode() { };
-
-	/**
-	 * get vector of tables involved in the query plan
-	 */
-	float getT() { return t; };
-
-	/**
-	 * get vector of tables involved in the query plan
-	 */
-	float getCost() { return c; };
-
-	/**
-	 * get vector of tables involved in the query plan
-	 */
-	float getRank() { return r; };
-
-	void setTable(Table* t, int column){ tables.push_back(t); columns.push_back(column); };
-
-	void importTables(vector<Table*> importTables){ tables = importTables; };
-	void importColumns(vector<int> importColumns){ columns = importColumns; };
-
-	/**
-	 * get joins involved in this query plan (undirected)
-	 */
-	vector<PrecedenceGraphNode> getChildren() { return children; };
-
-	/**
-	 * get joins involved in this query plan (undirected)
-	 */
-	void importChildren(vector<PrecedenceGraphNode> importChildren) { children=importChildren; };
-
-	/**
-	 * get joins involved in this query plan (undirected)
-	 */
-	vector<Table*> getTables() { return tables; };
-	vector<int> getColumns() { return columns; };
-	
-	/**
-	 * get join columns in this query plan (undirected)
-	 */
-	PrecedenceGraphNode* getParent() { return parent; };
-	
-	
-	/**
-	 * get join columns in this query plan (undirected)
-	 */
-	void setParent(PrecedenceGraphNode* node) { parent = node; };
-
-	/**
-	 * add a join to the query plan
-	 */
-	void addChild(PrecedenceGraphNode child) {
-		children.push_back(child);
-	}
-	virtual ~PrecedenceGraphNode() {};
-
-protected:
-	float t;
-	float c;
-	float r;
-	vector<PrecedenceGraphNode> children;
-	PrecedenceGraphNode* parent;
-	vector<Table*> tables;
-	vector<int> columns;
-};
-
 class Database {
 public:
 	Database();
@@ -218,7 +147,7 @@ public:
 	 */
 	vector<Table*> getJoinOrder(QueryGraph* queryGraph);
 	vector<Table*> getOptimalLDT(PrecedenceGraphNode root);
-	PrecedenceGraphNode queryGraphToPrecedenceGraph(vector<Table*>* tables, vector<pair<Table*, Table*> >* joins, vector<pair<int, int> >* columns, Table* table, int column);
+	PrecedenceGraphNode queryGraphToPrecedenceGraph(vector<Table*>* tables, vector<pair<Table*, Table*> >* joins , Table* table);
 	bool isNotChain(PrecedenceGraphNode* root);
 	PrecedenceGraphNode* getSubtreeRoot(PrecedenceGraphNode* node);
 	PrecedenceGraphNode* normalize(PrecedenceGraphNode* node);
