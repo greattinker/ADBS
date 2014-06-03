@@ -51,14 +51,14 @@ PrecedenceGraphNode Database::queryGraphToPrecedenceGraph(vector<pair<Table*, Ta
 	PrecedenceGraphNode node(table);
 	for(vector<pair<Table*, Table*> >::iterator it = joins.begin(); it != joins.end(); ++it){
 		if((*it).first == table){
-			PrecedenceGraphNode child = queryGraphToPrecedenceGraph(joins , (*it).first);
-			node.addChild(&child);
-			child.setParent(&node);
+			//PrecedenceGraphNode child = queryGraphToPrecedenceGraph(joins , (*it).first);
+			//node.addChild(&child);
+			//child.setParent(&node);
 		}
 		else if((*it).second == table){
-			PrecedenceGraphNode child = queryGraphToPrecedenceGraph(joins , (*it).second);
-			node.addChild(&child);
-			child.setParent(&node);
+			//PrecedenceGraphNode child = queryGraphToPrecedenceGraph(joins , (*it).second);
+			//node.addChild(&child);
+			//child.setParent(&node);
 		}
 	}	
 

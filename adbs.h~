@@ -213,7 +213,7 @@ public:
 	/**
 	 * get join columns in this query plan (undirected)
 	 */
-	void setParent(PrecedenceGraphNode* node) { parent = node; };
+	void setParent(PrecedenceGraphNode* p) { parent = p; };
 
 	/**
 	 * add a join to the query plan
