@@ -146,7 +146,7 @@ public:
 	 * calculate the optimal join order for the query graph
 	 */
 	vector<Table*> getJoinOrder(QueryGraph* queryGraph);
-	vector<Table*> getOptimalLDT(QueryGraph* queryGraph, Table* table);
+//	vector<Table*> getOptimalLDT(QueryGraph* queryGraph, Table* table);
 	virtual ~Database();
 };
 

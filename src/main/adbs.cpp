@@ -22,7 +22,7 @@ vector<Table*> Database::getJoinOrder(QueryGraph* queryGraph) {
 	vector<pair<Table*, Table*> > joins = queryGraph->getJoins();
 	vector<pair<int, int> > joinColumns = queryGraph->getJoinColumns();
 	
-	vector<Table*> *results = ( vector<Table*>* )malloc( sizeof( vector<Table*> ) * tables.size() );
+//	vector<Table*> *results = ( vector<Table*>* )malloc( sizeof( vector<Table*> ) * tables.size() );
 	
 //	testing all possible root relations
 //	int i = 0;
@@ -37,9 +37,9 @@ vector<Table*> Database::getJoinOrder(QueryGraph* queryGraph) {
 }
 
 
-vector<Table*> Database::getOptimalLDT(QueryGraph* queryGraph, Table* table) {
-	
-}
+//vector<Table*> Database::getOptimalLDT(QueryGraph* queryGraph, Table* table) {
+//	return 
+//}
 
 
 Database::~Database() {
