@@ -203,8 +203,10 @@ PrecedenceGraphNode Database::queryGraphToPrecedenceGraph(vector<Table*>* tables
 				child.setParent(&node);
 			}
 		}
-		else if((*it).second == table){
-			if(std::find(tables->begin(), tables->end(), (*it).first) != tables->end()){
+		else if((*it).second == table)
+		{
+			if(std::find(tables->begin(), tables->end(), (*it).first) != tables->end())
+			{
 				PrecedenceGraphNode child = queryGraphToPrecedenceGraph(tables, joins , (*it).first);
 				cout << "returned from "+child.getTables().front()->getName() << endl;
 				node.addChild(child);
