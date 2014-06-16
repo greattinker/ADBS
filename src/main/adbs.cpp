@@ -132,6 +132,7 @@ vector<Table*> Database::getOptimalLDT(PrecedenceGraphNode* root) {
 	{
 		cout << "while isnotchain-loop" << endl;
 		vector<PrecedenceGraphNode> children = root->getChildren();
+		root->clearChildren();
 		//merge and normalize all children of root node
 		for(vector<PrecedenceGraphNode>::iterator it = children.begin(); it != children.end(); ++it)
 		{
@@ -167,6 +168,7 @@ vector<Table*> Database::getOptimalLDT(PrecedenceGraphNode* root) {
 				}
 				cout << "\t\tdas sollte table 2 sein " << subtreeRoot->getTables().front()->getName()  << endl;
 				cout << "\t\tdas sollte 1 sein " << subtreeRoot->getChildren().size()  << endl;
+				cout << "\t\tsollte ebenfasll 1 sein " << (*it).getChildren().size()  << endl;
 				cout << "\t\tdas sollte table 4 sein " << subtreeRoot->getChildren().front().getTables().front()->getName()  << endl;
 			}
 		}
