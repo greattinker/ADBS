@@ -141,11 +141,11 @@ vector<Table*> Database::denormalize(PrecedenceGraphNode* node)
 	
 	if(node->getRepresentedNode() == NULL){
 		result = node->getTables();
-		parentTables = this->denormalize(node->getParent());
 	}else{
 		result = node->getRepresentedNode()->getTables();
-		parentTables = this->denormalize(node->getRepresentedNode()->getParent());
+//		parentTables = this->denormalize(node->getRepresentedNode()->getParent());
 	}
+		parentTables = this->denormalize(node->getParent());
 	
 //	cout << "here" << endl;
 	
@@ -208,6 +208,7 @@ vector<Table*> Database::getOptimalLDT(PrecedenceGraphNode* root) {
 	//denormalize
 
 	cout << "denormalize call" << endl;
+	cout << "root children " << root->getChildren().size() << endl;
 	return this->denormalize(root);
 }
 
