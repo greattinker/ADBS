@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 	queryGraph.addJoin(table2, table1, 0, 0);
 	queryGraph.addJoin(table2, table3, 1, 0);
 	queryGraph.addJoin(table2, table4, 2, 0);
-	cout << "table2 unique values " << table2->getNumberDifferentValuesofColumn(2) << endl;
+	
 	vector<Table*> joinOrder = database.getJoinOrder(&queryGraph);
 
 	cout << "Join Order:" << endl;

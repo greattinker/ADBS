@@ -38,7 +38,6 @@ public:
 protected:
 	map<int, unsigned int>* widthCountForColumns;
 	int* width;
-	const int partitions = 1000;
 };
 
 
@@ -66,7 +65,7 @@ public:
 	
 	int getNumberOfEntries(){ return data.size(); };
 	
-	int getNumberDifferentValuesofColumn(int column);
+	int getNDVofColumn(int column);
 	
 	void createStatisticsForColumn(int column) { this->columnStats->createColumnStatistics(this, column); };
 	
@@ -135,7 +134,10 @@ protected:
 
 class PrecedenceGraphNode {
 public:
-	PrecedenceGraphNode() { };
+	PrecedenceGraphNode() {
+		this->representedNode = NULL;
+		this->parent = NULL;
+	 };
 
 	/**
 	 * get vector of tables involved in the query plan
@@ -167,7 +169,7 @@ public:
 	void importChildren(vector<PrecedenceGraphNode> importChildren) { children=importChildren; };
 
 	/**
-	 * get joins involved in this query plan (undirected)
+	 * get joins queryGraphToPrecedenceGraphinvolved in this query plan (undirected)
 	 */
 	vector<Table*> getTables() { return tables; };
 	
@@ -193,6 +195,7 @@ public:
 	void clearChildren() {
 		children.clear();
 	};
+	
 	void removeChild(PrecedenceGraphNode child) {
 		for(vector<PrecedenceGraphNode>::iterator it = children.begin(); it != children.end(); ++it){
 			if((*it).getTables().front()->getName() == child.getTables().front()->getName())
@@ -242,6 +245,7 @@ public:
 	bool isNotChain(PrecedenceGraphNode* root);
 	PrecedenceGraphNode* getSubtreeRoot(PrecedenceGraphNode* currentRoot, PrecedenceGraphNode* currentNode);
 	void normalize(PrecedenceGraphNode* node);
+	vector<Table*> denormalize(PrecedenceGraphNode* node);
 	bool sortDescendingByRank(PrecedenceGraphNode i, PrecedenceGraphNode j) { return (j.getRank()<i.getRank()); };
 	virtual ~Database();
 };

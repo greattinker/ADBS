@@ -42,7 +42,9 @@ vector<Table*> Database::getJoinOrder(QueryGraph* queryGraph) {
 		cout << "root is:"+(*it)->getName() << endl;
 		cout << root.getChildren().size() << endl;
 		cout << "!!!!!!!!!!!" << endl;
-		getOptimalLDT(&root);
+		results[i] = this->getOptimalLDT(&root);
+		
+		i++;
 	}
 	
 	
@@ -50,7 +52,7 @@ vector<Table*> Database::getJoinOrder(QueryGraph* queryGraph) {
 //	for test geht the first
 	//result = R.front().second;
 
-	return result;
+	return results[1];
 }
 
 bool Database::isNotChain(PrecedenceGraphNode* root){
@@ -87,7 +89,7 @@ void Database::normalize(PrecedenceGraphNode* node){
 	//consider the case that the subtree is a chain allready, which means subtreeroot only has 1 child
 	cout << "\tnormalisiere " << node->getTables().front()->getName() << endl;
 	//HIER!!! frag mich doch nicht was hier falsch läuft >< in Zeile 151 sagt er, ja ich habe nur 1 kind, aber hier sagt er, ich hab 2 kinder.. dabei zeigt der Zeiger doch wohl auf das gleiche objekt
-	cout << "\tchildren size" << node->getChildren().size() << endl;
+//	cout << "\tchildren size" << node->getChildren().size() << endl;
 	if(isNotChain(node))
 	{		
 		vector<PrecedenceGraphNode> children = node->getChildren();
@@ -126,11 +128,40 @@ void Database::normalize(PrecedenceGraphNode* node){
 	}
 }
 
+vector<Table*> Database::denormalize(PrecedenceGraphNode* node) 
+{
+	vector<Table*> result(0); 
+	vector<Table*> parentTables(0);
+	
+//	cout << "ere" << endl;
+	if(node == NULL){ 
+//		cout << "node is NULL" << endl; 
+		return vector<Table*>(); 
+	}
+	
+	if(node->getRepresentedNode() == NULL){
+		result = node->getTables();
+		parentTables = this->denormalize(node->getParent());
+	}else{
+		result = node->getRepresentedNode()->getTables();
+		parentTables = this->denormalize(node->getRepresentedNode()->getParent());
+	}
+	
+//	cout << "here" << endl;
+	
+	if(parentTables.size() > 0){
+		result.reserve(result.size() + parentTables.size());
+		result.insert(result.end(), parentTables.begin(), parentTables.end());
+	}
+	
+	return result;
+}
+
 vector<Table*> Database::getOptimalLDT(PrecedenceGraphNode* root) {
 	cout << "call getOptimalLDT" << endl;
 	while(isNotChain(root))
 	{
-		cout << "while isnotchain-loop" << endl;
+//		cout << "while isnotchain-loop" << endl;
 		vector<PrecedenceGraphNode> children = root->getChildren();
 		root->clearChildren();
 		//merge and normalize all children of root node
@@ -139,7 +170,7 @@ vector<Table*> Database::getOptimalLDT(PrecedenceGraphNode* root) {
 			if(!((*it).getChildren().size() == 0))
 			{
 				PrecedenceGraphNode* subtreeRoot = getSubtreeRoot(&(*it), &(*it));
-				cout << subtreeRoot->getTables().front()->getName() << endl;
+//				cout << subtreeRoot->getTables().front()->getName() << endl;
 				this->normalize(subtreeRoot);
 			
 				//merge chains in descending order so we can just pop the first node from the back of the list
@@ -149,34 +180,35 @@ vector<Table*> Database::getOptimalLDT(PrecedenceGraphNode* root) {
 				//sort children by rank! however it's not implemented yet^^
 				PrecedenceGraphNode* currentNode = subtreeRoot;
 				
-				cout << "\t\tmuss " << mergeList.size() << " Knoten mergen" << endl;
+//				cout << "\t\tmuss " << mergeList.size() << " Knoten mergen" << endl;
 				
 				while(mergeList.size() > 0){
 					//cout << "merge jetzt " << currentNode->getTables().front()->getName() << endl;
 					PrecedenceGraphNode lastChild = mergeList.back();
 					mergeList.pop_back();
 					
-					cout << "\t\t\tmuss noch " << mergeList.size() << " Knoten mergen" << endl;
+//					cout << "\t\t\tmuss noch " << mergeList.size() << " Knoten mergen" << endl;
 					
 					currentNode->addChild(lastChild);
 					
-					cout << "\t\t\tlastChild ist " << lastChild.getTables().front()->getName() << endl;
+//					cout << "\t\t\tlastChild ist " << lastChild.getTables().front()->getName() << endl;
 					
 					currentNode = &lastChild;
 					
-					cout << "\t\t\tund damit auch currentNode " << currentNode->getTables().front()->getName() << endl;
+//					cout << "\t\t\tund damit auch currentNode " << currentNode->getTables().front()->getName() << endl;
 				}
-				cout << "\t\tdas sollte table 2 sein " << subtreeRoot->getTables().front()->getName()  << endl;
-				cout << "\t\tdas sollte 1 sein " << subtreeRoot->getChildren().size()  << endl;
-				cout << "\t\tsollte ebenfasll 1 sein " << (*it).getChildren().size()  << endl;
-				cout << "\t\tdas sollte table 4 sein " << subtreeRoot->getChildren().front().getTables().front()->getName()  << endl;
+//				cout << "\t\tdas sollte table 2 sein " << subtreeRoot->getTables().front()->getName()  << endl;
+//				cout << "\t\tdas sollte 1 sein " << subtreeRoot->getChildren().size()  << endl;
+//				cout << "\t\tsollte ebenfasll 1 sein " << (*it).getChildren().size()  << endl;
+//				cout << "\t\tdas sollte table 4 sein " << subtreeRoot->getChildren().front().getTables().front()->getName()  << endl;
 			}
 		}
 	}
 
 	//denormalize
 
-	return root->getTables();
+	cout << "denormalize call" << endl;
+	return this->denormalize(root);
 }
 
 
@@ -192,7 +224,7 @@ PrecedenceGraphNode Database::queryGraphToPrecedenceGraph(vector<Table*>* tables
 		cout << (*it)->getName() << endl;
 	}
 
-	cout << "currend node is "+table->getName() << endl;
+//	cout << "currend node is "+table->getName() << endl;
 
 
 	for(vector<pair<Table*, Table*> >::iterator it = joins->begin(); it != joins->end(); ++it){
@@ -200,7 +232,7 @@ PrecedenceGraphNode Database::queryGraphToPrecedenceGraph(vector<Table*>* tables
 		if((*it).first == table){
 			if(std::find(tables->begin(), tables->end(), (*it).second) != tables->end()){
 				PrecedenceGraphNode child = queryGraphToPrecedenceGraph(tables, joins , (*it).second);
-				cout << "returned from "+child.getTables().front()->getName() << endl;
+//				cout << "returned from "+child.getTables().front()->getName() << endl;
 				node.addChild(child);
 				child.setParent(&node);
 			}
@@ -210,13 +242,13 @@ PrecedenceGraphNode Database::queryGraphToPrecedenceGraph(vector<Table*>* tables
 			if(std::find(tables->begin(), tables->end(), (*it).first) != tables->end())
 			{
 				PrecedenceGraphNode child = queryGraphToPrecedenceGraph(tables, joins , (*it).first);
-				cout << "returned from "+child.getTables().front()->getName() << endl;
+//				cout << "returned from "+child.getTables().front()->getName() << endl;
 				node.addChild(child);
 				child.setParent(&node);
 			}
 		}
 	}	
-	cout << "over" << endl;
+//	cout << "over" << endl;
 	return node;
 }
 
@@ -248,7 +280,7 @@ bool Table::insert(int* tuple) {
 	return true;
 }
 
-int Table::getNumberDifferentValuesofColumn(int column){ 
+int Table::getNDVofColumn(int column){ 
 	if(this->columnStats != NULL){
 		return this->columnStats->getNDVforColumn(column);
 	}else{
@@ -297,6 +329,8 @@ void EquiWidthStat::incrementWidthCount(int column, int value){
 }
 
 void EquiWidthStat::createColumnStatistics(Table* table, int column){
+	if(table->getNumberOfEntries() == 0) return;
+	
 //	int width = ceil(table->getNumberOfEntries()/this->partitions);
 	int width = ceil((table->getGreatestColumnValue(column) + (-1) * table->getSmallestColumnValue(column)) / table->getNumberOfEntries());
 	if(width == 0) width = 1;
